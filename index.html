@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MVS</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            height: 100vh;
+            background-color: #1e1e1e;
+            color: #dcdcdc;
+        }
+        .container {
+            display: flex;
+            width: 100%;
+        }
+        .sidebar {
+            width: 250px;
+            background-color: #333;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .sidebar a {
+            color: #dcdcdc;
+            text-decoration: none;
+            padding: 10px;
+            display: block;
+            border-radius: 5px;
+        }
+        .sidebar a:hover {
+            background-color: #444;
+        }
+        .content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        .toolbar {
+            background-color: #2c2c2c;
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .editor {
+            background-color: #1e1e1e;
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            height: 100%;
+        }
+        .status-bar {
+            background-color: #333;
+            padding: 5px 10px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .status-bar span {
+            font-size: 12px;
+        }
+        select {
+            background-color: #444;
+            color: #dcdcdc;
+            border: none;
+            padding: 5px;
+            font-size: 14px;
+            border-radius: 5px;
+        }
+        .view-section {
+            display: none;
+        }
+        .active-view {
+            display: block;
+        }
+    </style>
+    <!-- Include Monaco Editor -->
+    <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.39.0/min/vs/loader.js"></script>
+</head>
+<body>
+
+<div class="container">
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <a href="#" id="explorer">Explorer</a>
+        <a href="#" id="extensions">Extensions</a>
+        <a href="#" id="git">Git</a>
+    </div>
+
+    <!-- Content Area -->
+    <div class="content">
+        <!-- Toolbar -->
+        <div class="toolbar">
+            <span>Minimal Visual Studio</span>
+            <div>
+                <label for="language-select">Language: </label>
+                <select id="language-select">
+                    <option value="html">HTML</option>
+                    <option value="javascript">JavaScript</option>
+                    <option value="python">Python</option>
+                    <option value="css">CSS</option>
+                    <option value="typescript">TypeScript</option>
+                </select>
+            </div>
+            <button onclick="openSettings()">Settings</button>
+        </div>
+
+        <!-- Code Editor -->
+        <div class="editor" id="editor"></div>
+
+        <!-- Status Bar -->
+        <div class="status-bar">
+            <span>Line 1, Column 1</span>
+            <span id="language-status">Language: HTML</span>
+            <span>Git: None</span>
+        </div>
+
+        <!-- View Sections -->
+        <div class="view-section" id="explorer-view">
+            <h2>Explorer</h2>
+            <p>Here, you would see a file explorer to browse and open files.</p>
+        </div>
+        <div class="view-section" id="extensions-view">
+            <h2>Extensions</h2>
+            <p>Manage and install extensions for your IDE here.</p>
+        </div>
+        <div class="view-section" id="git-view">
+            <h2>Git</h2>
+            <p>View Git status and manage repositories here.</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Monaco Editor configuration
+    require.config({ paths: { vs: 'https://cdn.jsdelivr.net/npm/monaco-editor@0.39.0/min/vs' } });
+
+    require(['vs/editor/editor.main'], function () {
+        // Initialize Monaco Editor with HTML language by default
+        var editor = monaco.editor.create(document.getElementById('editor'), {
+            value: [
+                '<!DOCTYPE html>',
+                '<html>',
+                '<head>',
+                '    <title>Example</title>',
+                '</head>',
+                '<body>',
+                '    <h1>Hello, Monaco Editor!</h1>',
+                '    <p>Start coding...</p>',
+                '</body>',
+                '</html>'
+            ].join('\n'),
+            language: 'html',
+            theme: 'vs-dark',
+            automaticLayout: true
+        });
+
+        // Handle language switch
+        document.getElementById('language-select').addEventListener('change', function (e) {
+            const selectedLanguage = e.target.value;
+            editor.getModel().setLanguage(selectedLanguage);  // Change the editor's language
+            document.getElementById('language-status').textContent = `Language: ${capitalizeFirstLetter(selectedLanguage)}`;
+            editor.setValue(getDefaultCodeForLanguage(selectedLanguage)); // Change the code in the editor
+        });
+
+        // Set the default code for each language
+        function getDefaultCodeForLanguage(language) {
+            switch (language) {
+                case 'html':
+                    return [
+                        '<!DOCTYPE html>',
+                        '<html>',
+                        '<head>',
+                        '    <title>Example</title>',
+                        '</head>',
+                        '<body>',
+                        '    <h1>Hello, Monaco Editor!</h1>',
+                        '    <p>Start coding...</p>',
+                        '</body>',
+                        '</html>'
+                    ].join('\n');
+                case 'javascript':
+                    return [
+                        'console.log("Hello, Monaco Editor!");',
+                        'function greet() {',
+                        '    console.log("Greetings from JavaScript!");',
+                        '}'
+                    ].join('\n');
+                case 'python':
+                    return [
+                        'print("Hello, Monaco Editor!")',
+                        'def greet():',
+                        '    print("Greetings from Python!")',
+                    ].join('\n');
+                case 'css':
+                    return [
+                        'body {',
+                        '    background-color: #1e1e1e;',
+                        '    color: #dcdcdc;',
+                        '}',
+                        'h1 {',
+                        '    color: #ff6f61;',
+                        '}'
+                    ].join('\n');
+                case 'typescript':
+                    return [
+                        'console.log("Hello, Monaco Editor!");',
+                        'function greet(): void {',
+                        '    console.log("Greetings from TypeScript!");',
+                        '}',
+                        'greet();'
+                    ].join('\n');
+                default:
+                    return '';
+            }
+        }
+
+        // Capitalize the first letter of a string (for language display)
+        function capitalizeFirstLetter(string) {
+            return string.charAt(0).toUpperCase() + string.slice(1);
+        }
+
+        // Editor events and interactions
+        editor.onDidChangeCursorPosition(function (e) {
+            const position = editor.getPosition();
+            document.querySelector('.status-bar span').textContent = `Line ${position.lineNumber}, Column ${position.column}`;
+        });
+    });
+
+    // Placeholder function to simulate opening settings
+    function openSettings() {
+        alert("Under construction!");
+    }
+
+    // Sidebar button clicks
+    document.getElementById('explorer').addEventListener('click', function() {
+        switchView('explorer-view');
+    });
+    document.getElementById('extensions').addEventListener('click', function() {
+        switchView('extensions-view');
+    });
+    document.getElementById('git').addEventListener('click', function() {
+        switchView('git-view');
+    });
+
+    // Switch view logic
+    function switchView(viewId) {
+        // Hide all sections
+        const views = document.querySelectorAll('.view-section');
+        views.forEach(view => {
+            view.classList.remove('active-view');
+        });
+
+        // Show selected section
+        const selectedView = document.getElementById(viewId);
+        selectedView.classList.add('active-view');
+    }
+</script>
+
+</body>
+</html>
